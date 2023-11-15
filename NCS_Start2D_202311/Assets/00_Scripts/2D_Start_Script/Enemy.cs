@@ -1,98 +1,110 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour,IHit
 {
-    private Vector3 v3 = Vector3.left;
-    private Vector3 veR = Vector3.right;
-    public float speed = 2f;
-    public Animator mosion;
-    Vector3 scaleVec = Vector3.one;
-    public SpriteRenderer sr;
-    private int HP = 50;
-    private int MaxHP = 50;
-    private int Power = 0;
-    
-    // Start is called before the first frame update
+    public Slider slider;
+    Rigidbody2D rigid;
+    Animator anim;
+    bool IsMove = false;
+    bool IsLeft = true;
+
+    Transform childTr;
+    Vector3 vec = Vector3.right;
+    Vector3 scale = Vector3.one; //(1,1,1)
+    Coroutine enemyCor = null;        
+
+    public Constructure.Stat stat;
+
     void Start()
     {
-        HP = 50;
-        mosion = transform.GetComponent<Animator>();
+        rigid = GetComponent<Rigidbody2D>();
+        stat = new Constructure.Stat(100,10);
+        childTr = transform.GetChild(0);
+        anim = childTr.GetComponent<Animator>();
+
+        slider.maxValue = stat.MaxHP;
+        slider.value = stat.HP;
+        ////æ÷¥œ∏ﬁ¿Ã≈Õ∞° ¿⁄Ωƒø°∞‘ ¿÷¿ª∞ÊøÏ
+        //anim = transform.GetChild(0).GetComponent<Animator>();
+        vec *= 3 * Time.fixedDeltaTime;//æ∆øπ Ω∫««µÂøÕ Ω√∞£¥Á¿ª ∞ˆ«—∞™ //(0.06,0,0) 
+        enemyCor = StartCoroutine(EnemyMove());
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator EnemyMove()
     {
-        transform.Translate(v3 * Time.deltaTime * speed);
-        
-        if (v3.x != 0)
+        while (true)
         {
-            scaleVec.x = v3.x;
-            StartCoroutine(Moving());
-            mosion.SetBool("IsMove", true);
-            
+            IsMove = true;
+            anim.SetBool("IsMove", IsMove);
+            yield return new WaitForSeconds( Random.Range (1f,3f));
+            IsMove = false; 
+            anim.SetBool("IsMove", IsMove);
+            IsLeft = Random.Range(0, 2) == 0 ? true : false;
+            yield return new WaitForSeconds(Random.Range(0.5f, 1f));
         }
-        else
-        {
-            mosion.SetBool("IsMove", false);
-            
-        }
     }
-
-    IEnumerator Moving()
+    void FixedUpdate()
     {
-        yield return new WaitForSeconds(3);
-        speed = 2f;
-        sr.flipX = true;
-        scaleVec.x = veR.x;
-        transform.Translate(veR * Time.deltaTime * speed);
-        
-    }
-
-    
-
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player"))
+        if (IsMove)
         {
-            Transform playerTransform = other.transform;
-            float playerY = playerTransform.position.y;
-            float enemyY = transform.position.y;
-            if (playerY > enemyY)
+            scale.x = (IsLeft ? 1 : -1);
+            childTr.localScale = scale;
+            transform.Translate(vec * (IsLeft ? -1: 1));
+
+            if (transform.position.x <= GameManager.Instance.posRange[0].position.x)
             {
-                Hit();
-                sr.color = Color.red;
-                StartCoroutine(ColorChangle());
+                IsLeft = false;
             }
-            else
+            else if (transform.position.x >= GameManager.Instance.posRange[1].position.x)
             {
-                sr.color = Color.white;
+                IsLeft = true;
             }
         }
-        
     }
-    
-    public void Hit()
+    public void Hit(float damage, Vector3 dir)
     {
-        HP -= 10;
-        
-        Debug.Log($"Ï†ÅÏ±ÑÎ†• : {HP}");
-        if (HP == 0)
+        Debug.Log("¿˚HP : " + this.stat.HP);
+        if (stat.HP <= 0)
         {
-            Debug.Log("Enemy ÏÇ¨ÎßùÌñàÏäµÎãàÎã§");
-            gameObject.SetActive(false);
+            return;
         }
-    }
 
-    IEnumerator ColorChangle()
+        this.stat.HP = Mathf.Clamp(this.stat.HP - damage, 0, this.stat.MaxHP);
+        slider.value = this.stat.HP;
+        anim.SetTrigger("Hit");
+        rigid.AddForce(dir, ForceMode2D.Impulse);
+    }
+    public float GetAtt()
     {
-        yield return new WaitForSeconds(0.5f);
-        sr.color = Color.white;
+        return stat.Att;
     }
+    //void Start()
+    //{
+    //    anim = transform.GetChild(0).GetComponent<Animator>();
+    //    isMove = false;
+    //    StartCoroutine(EnemyAction());
+    //}
 
-    
-    
-    
+    //// Update is called once per frame
+    //void Update()
+    //{
+    //    if (isMove==false)
+    //    {
+    //        transform.Translate(Vector3.right * Time.deltaTime * 2);
+    //    }
+    //}
+
+    //IEnumerator EnemyAction()
+    //{
+    //    while (true)
+    //    {
+    //        yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
+    //        isMove = !isMove;
+
+    //        anim.SetBool("IsMovePos", isMove);
+    //    }        
+    //}
 }

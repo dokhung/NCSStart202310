@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    #region ì‹±ê¸€í†¤ ë¬¶ìŒ
+    #region ½Ì±ÛÅæ ¹­À½
     private static GameManager instance = null;
     public static GameManager Instance => instance;
     void Awake()
@@ -24,36 +24,37 @@ public class GameManager : MonoBehaviour
         }
     }
     #endregion
-    public Transform[] posRange; //í‘¸ë“œê°€ ë§Œë“¤ì–´ì§ˆ ë²”ìœ„ íŠ¸ëœìŠ¤í¼..
-    public Text scoreText; //ì ìˆ˜ ì¶œë ¥ìš©
-    public GameObject foodPrefab; //í‘¸ë“œ ì›ë³¸...
-    public Sprite[] AllItemSprites;//í‘¸ë“œì˜ ê·¸ë¦¼ì´ ë˜ì–´ì¤„ ì¹œêµ¬ë“¤
+    public Transform[] posRange; //Çªµå°¡ ¸¸µé¾îÁú ¹üÀ§ Æ®·£½ºÆû..
+    public Text scoreText; //Á¡¼ö Ãâ·Â¿ë
+    public GameObject foodPrefab; //Çªµå ¿øº»...
+    public Sprite[] AllItemSprites;//ÇªµåÀÇ ±×¸²ÀÌ µÇ¾îÁÙ Ä£±¸µé
 
     float generateTime=0;
-    [SerializeField] //í”„ë¼ì´ë¹—ì´ì–´ë„ ì¸ìŠ¤í™í„°ì°½ì— ë³´ì´ë„ë¡í•˜ëŠ” attribute
+    [SerializeField] //ÇÁ¶óÀÌºøÀÌ¾îµµ ÀÎ½ºÆåÅÍÃ¢¿¡ º¸ÀÌµµ·ÏÇÏ´Â attribute
     float generateTime_Min = 0;
-    [SerializeField] //í”„ë¼ì´ë¹—ì´ì–´ë„ ì¸ìŠ¤í™í„°ì°½ì— ë³´ì´ë„ë¡í•˜ëŠ” attribute
+    [SerializeField] //ÇÁ¶óÀÌºøÀÌ¾îµµ ÀÎ½ºÆåÅÍÃ¢¿¡ º¸ÀÌµµ·ÏÇÏ´Â attribute
     float generateTime_Max = 0;
     int score = 0;
 
     int picnum = 0;
 
-    //ì¼ì •ì‹œê°„ë§ˆë‹¤ foodprefabìƒì„±í•´ì„œ
-    //ê·¸ì¹œêµ¬ë¥¼ ë‚´ë ¤ë³´ë‚´ê¸°...
-    GameObject tmpobj; //ì„ì‹œë³€ìˆ˜        
-    Food tmpFood; //ìŒì‹ ìŠ¤í¬ë¦½íŠ¸ ì ì‹œ ë°›ì•„ë‘˜ ì„ì‹œë³€ìˆ˜
+    //ÀÏÁ¤½Ã°£¸¶´Ù foodprefab»ı¼ºÇØ¼­
+    //±×Ä£±¸¸¦ ³»·Áº¸³»±â...
+    GameObject tmpobj; //ÀÓ½Ãº¯¼ö        
+    Food tmpFood; //À½½Ä ½ºÅ©¸³Æ® Àá½Ã ¹Ş¾ÆµÑ ÀÓ½Ãº¯¼ö
     Vector3 vec = Vector3.zero;
 
-    //ì˜¤ë¸Œì íŠ¸í’€ ìš© ë³€ìˆ˜ì„ ì–¸.    
+    //¿ÀºêÁ§Æ®Ç® ¿ë º¯¼ö¼±¾ğ.    
     Queue<Food> objectPool = new Queue<Food>();
 
     void Start()
     {
-        //ë¨¼ì € ì˜¤ë¸Œì íŠ¸ í’€ì— ë‚´ê°€ ì“¸ ìµœëŒ€ ê°ì²´ë“¤ì„ ë§Œë“¤ì–´ë‘˜ê²ƒì„...
-        //ì ¤ë¦¬ í•˜ë‚˜ê°€ íƒœì–´ë‚˜ì„œ ë•…ì— ë–¨ì–´ì ¸ ì£½ì„ë–„ê¹Œì§€
-        //í•œí™”ë©´ì— ìµœëŒ€ 20ê°œì˜ ì ¤ë¦¬ëŠ” ì•ˆë„˜ì„ê²ƒê°™ë‹¤. ë¼ê³  ìƒê°ë˜ë©´,
-        //foodPrefabì¹œêµ¬ë¥¼ 20ê°œ ë§Œë“¤ì–´ë‘ê³  ì˜¤ë¸Œì íŠ¸í’€ì— ë„£ì–´ë‘ .
-        //í•´ë‹¹ ì˜¤ë¸Œì íŠ¸ í’€ì˜ ë‚´ìš©ë“¤ì„ ëª¨ë‘ êº¼ë‘ . (setactive(false)) 
+        scoreText.text = "";
+        //¸ÕÀú ¿ÀºêÁ§Æ® Ç®¿¡ ³»°¡ ¾µ ÃÖ´ë °´Ã¼µéÀ» ¸¸µé¾îµÑ°ÍÀÓ...
+        //Á©¸® ÇÏ³ª°¡ ÅÂ¾î³ª¼­ ¶¥¿¡ ¶³¾îÁ® Á×À»‹š±îÁö
+        //ÇÑÈ­¸é¿¡ ÃÖ´ë 20°³ÀÇ Á©¸®´Â ¾È³ÑÀ»°Í°°´Ù. ¶ó°í »ı°¢µÇ¸é,
+        //foodPrefabÄ£±¸¸¦ 20°³ ¸¸µé¾îµÎ°í ¿ÀºêÁ§Æ®Ç®¿¡ ³Ö¾îµÒ.
+        //ÇØ´ç ¿ÀºêÁ§Æ® Ç®ÀÇ ³»¿ëµéÀ» ¸ğµÎ ²¨µÒ. (setactive(false)) 
         for (int i = 0; i < 20; i++)
         {
             tmpobj = Instantiate(foodPrefab, this.transform.GetChild(0));            
@@ -66,7 +67,7 @@ public class GameManager : MonoBehaviour
 
     public Food GetFoodFromPool()
     {
-        if (objectPool.Count > 0) //ì˜¤ë¸Œì íŠ¸ í’€ì— ë‚´ìš©ë¬¼ì´ ìˆë‹¤ë©´~
+        if (objectPool.Count > 0) //¿ÀºêÁ§Æ® Ç®¿¡ ³»¿ë¹°ÀÌ ÀÖ´Ù¸é~
         {
             return objectPool.Dequeue();
         }
@@ -78,8 +79,8 @@ public class GameManager : MonoBehaviour
 
     public void ReturnFoodPool(Food _food)
     {
-        objectPool.Enqueue(_food); //ë‚´ê°€ ê´€ë¦¬í•˜ê¸°ìœ„í•´ì„œ, ë‚˜ì˜ ê´€ë¦¬ ë³€ìˆ˜ì— ë„£ì–´ë‘ëŠ”ê±°ê³ 
-        _food.gameObject.SetActive(false); //ì–˜ê°€ ê³„ì† ì¼œì ¸ìˆìœ¼ë©´ ê³„ì† ë°‘ìœ¼ë¡œ ë–¨ì–´ì§ˆê²ƒì´ê¸° ë•Œë¬¸ì—, ë¹„í™œì„±í™” í•´ë‘ .
+        objectPool.Enqueue(_food); //³»°¡ °ü¸®ÇÏ±âÀ§ÇØ¼­, ³ªÀÇ °ü¸® º¯¼ö¿¡ ³Ö¾îµÎ´Â°Å°í
+        _food.gameObject.SetActive(false); //¾ê°¡ °è¼Ó ÄÑÁ®ÀÖÀ¸¸é °è¼Ó ¹ØÀ¸·Î ¶³¾îÁú°ÍÀÌ±â ¶§¹®¿¡, ºñÈ°¼ºÈ­ ÇØµÒ.
     }
 
     IEnumerator GenerateFood()
@@ -89,27 +90,27 @@ public class GameManager : MonoBehaviour
             generateTime = Random.Range(generateTime_Min, generateTime_Max);
             yield return new WaitForSeconds(generateTime);
 
-            //ì¼ì •ì‹œê°„ë§ˆë‹¤ ë§Œë“¤ì–´ë‚´ëŠ” ê²ƒì´ ì•„ë‹ˆê³ 
-            //ì˜¤ë¸Œì íŠ¸ í’€ì—ìˆë˜ ã…‡ì¹œêµ¬ë¥¼ êº¼ë‚´ì„œ ë°ì´í„° ì„¸íŒ…
-            //setactiveë¥¼ trueë¥¼ í• ê²ƒ..
+            //ÀÏÁ¤½Ã°£¸¶´Ù ¸¸µé¾î³»´Â °ÍÀÌ ¾Æ´Ï°í
+            //¿ÀºêÁ§Æ® Ç®¿¡ÀÖ´ø ¤·Ä£±¸¸¦ ²¨³»¼­ µ¥ÀÌÅÍ ¼¼ÆÃ
+            //setactive¸¦ true¸¦ ÇÒ°Í..
 
-            //ì˜¤ë¸Œì íŠ¸ í’€ì—ì„œ êº¼ë‚´ì„œ ì“¸ê²ƒ...
+            //¿ÀºêÁ§Æ® Ç®¿¡¼­ ²¨³»¼­ ¾µ°Í...
             tmpFood = GetFoodFromPool();
             vec.y = posRange[0].position.y;
             vec.x = Random.Range(posRange[0].position.x, posRange[1].position.x);
-            tmpFood.transform.position = vec; //ìœ„ì¹˜ ì„¤ì • ì™„ë£Œ
+            tmpFood.transform.position = vec; //À§Ä¡ ¼³Á¤ ¿Ï·á
             picnum = Random.Range(0, AllItemSprites.Length);
             tmpFood.SetInfo(AllItemSprites[picnum], picnum+1);
             tmpFood.gameObject.SetActive(true);
-            //ìƒì„±ëœ í”„ë¦¬íŒ¹ì˜ ìœ„ì¹˜ ìˆ˜ì • //ë‚´ê°€ foodprefabì„ ìƒì„±í•˜ê³  ìˆìœ¼ë‹ˆê¹Œ ë‚´ê°€ ìœ„ì¹˜ ì¡°ì ˆê°€ëŠ¥í•¨.
-            //ê·¸ë ‡ê²Œ íƒœì–´ë‚œ ì¹œêµ¬ëŠ” ì•„ë˜ë¡œ ì´ë™í•´ì•¼í•¨//ë¦¬ì§€ë“œë°”ë””ë¥¼ ì£¼ë©´ í•´ê²°ë˜ê¸´í•¨.
-            //ìŒì‹ì´ ê·¸ë ‡ê²Œ ë•…ì— ë„ë‹¬í•˜ë©´ ì‚¬ë¼ì ¸ì•¼ë¨...
+            //»ı¼ºµÈ ÇÁ¸®ÆÕÀÇ À§Ä¡ ¼öÁ¤ //³»°¡ foodprefabÀ» »ı¼ºÇÏ°í ÀÖÀ¸´Ï±î ³»°¡ À§Ä¡ Á¶Àı°¡´ÉÇÔ.
+            //±×·¸°Ô ÅÂ¾î³­ Ä£±¸´Â ¾Æ·¡·Î ÀÌµ¿ÇØ¾ßÇÔ//¸®Áöµå¹Ùµğ¸¦ ÁÖ¸é ÇØ°áµÇ±äÇÔ.
+            //À½½ÄÀÌ ±×·¸°Ô ¶¥¿¡ µµ´ŞÇÏ¸é »ç¶óÁ®¾ßµÊ...
         }        
     }
 
     public void AddScore(int _score)
     {
         this.score+= _score;
-        scoreText.text = "ì ìˆ˜ : " + this.score;
+        scoreText.text = "Á¡¼ö : " + this.score;
     }
 }
