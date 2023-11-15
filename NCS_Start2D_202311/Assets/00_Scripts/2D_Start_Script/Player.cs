@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -14,16 +15,25 @@ public class Player : MonoBehaviour
     Vector3 scaleVec = Vector3.one;
     SpriteRenderer sprend;
     Animator anim;
+    
+
+    private int HP = 50;
+    private int MaxHP = 50;
+    private int Power = 1;
+
+    private bool isInput = false;
 
     void Start()
     {
         rigid = transform.GetComponent<Rigidbody2D>();        
         sprend = transform.GetComponent<SpriteRenderer>();
         anim = transform.GetComponent<Animator>();
+        Debug.Log($"현재채력 :{HP}" );
     }
 
     void Update() 
     {
+        
         //Input.GetAxis //뭔가 인풋을 세밀하게 받아옴 //-1~1 받아옴 //실수를 받음. 
         //알아둘점은.. 0.1.... 
         //Input.GetAxisRaw //뭔가 인풋을 -1,0,1 이렇게 받아옴//일반적인 키보드 인풋
@@ -52,6 +62,7 @@ public class Player : MonoBehaviour
         if (vec.x != 0)//뭔가 내가 움직이고 있는 상태
         {
             scaleVec.x = vec.x;
+            
             anim.SetBool("IsMove", true);
         }
         else //vex.x == x == 0 아무 입력이 없는 상태.
@@ -61,7 +72,6 @@ public class Player : MonoBehaviour
         //anim.SetFloat("해당 float형 변수이름", 실수);
         //anim.SetInteger("해당 int형 변수이름", 정수);
         transform.localScale = scaleVec; //1,1,1 // -1,1,1
-
 
         ////2번은 스프라이트렌더러를 뒤집는 법. //이방법을 쓰면, 콜라이더는 안뒤집히고 그자리에 가만히 있기때문.
         //if (vec.x < 0)
@@ -159,25 +169,48 @@ public class Player : MonoBehaviour
     ////콜리젼 라인은 둘다 콜리젼이어야, 안겹치고 콜리젼 함수가 불림
     void OnCollisionEnter2D(Collision2D collision) 
     {
+        Transform playerTransform = collision.transform;
+        float playerY = playerTransform.position.y;
+        float enemyY = transform.position.y;
         jumpCount = 0;//땅에 닿았을때 점프가 다시 가능하도록 점프카운트를 초기화시켜줌...
         if (collision.gameObject.CompareTag("Trap"))
         {
             anim.SetTrigger("Hit");
+            Vector2 targetPos = collision.transform.position;
+            Test(targetPos);
+        }
+
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            
+            if (playerY < enemyY)
+            {
+                HP = 50;
+            }
+            else
+            {
+                anim.SetTrigger("Hit");
+                Vector2 targetPos = collision.transform.position;
+                Test(targetPos);
+            }
         }
     }
 
-    //void OnCollisionExit2D(Collision2D collision)
-    //{
-    //    Debug.Log("그냥 콜리젼 접촉 해제");
-    //}
-    //void OnCollisionStay2D(Collision2D collision)
-    //{
-    //    Debug.Log("그냥 콜리젼 접촉 중");
-    //}
-
-    public void Test() //hit 도중에 불릴 테스트함수
+    public void Test(Vector2 targetPos) //hit 도중에 불릴 테스트함수
     {
         Debug.Log("아야");
+        HP -= 10;
+        int dir = transform.position.x - targetPos.x > 0 ? 1 : -1;
+        rigid.AddForce(new Vector2(dir, 1) * 3, ForceMode2D.Impulse);
+        
+        
+        Debug.Log($"채력{HP}");
+        if (HP == 0)
+        {
+            Debug.Log("사망했습니다");
+            gameObject.SetActive(false);
+        }
+
     }
 
     public int Test1()
