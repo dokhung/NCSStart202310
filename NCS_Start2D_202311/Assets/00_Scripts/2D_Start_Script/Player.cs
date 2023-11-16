@@ -128,11 +128,21 @@ public class Player : MonoBehaviour, IHit
             anim.SetTrigger("Jump");
             //anim.SetTrigger("Jump2");
         }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {            
+            TilemapManager.Instance.SetTile(transform.position + Vector3.right * scaleVec.x, AllEnum.TileKind.Coin_Bronze);
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            TilemapManager.Instance.SetTile(transform.position + Vector3.right * scaleVec.x, AllEnum.TileKind.End);
+            //TilemapManager.Instance.SwapTile(
+            //    TilemapManager.Instance.GetTile( transform.position + Vector3.right * scaleVec.x), null);
+        }
     }
 
     public void Hit(float damage, Vector3 dir) 
-    {
-        Debug.Log("플레이어HP : " + this.mystat.HP);
+    {        
         if (mystat.HP <=0)
         {
             return;
