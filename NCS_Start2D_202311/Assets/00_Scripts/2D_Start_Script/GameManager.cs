@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class GameManager : MonoBehaviour
         }
     }
     #endregion
+
+    public Player player;
+
     public Transform[] posRange; //푸드가 만들어질 범위 트랜스폼..
     public Text scoreText; //점수 출력용
     public GameObject foodPrefab; //푸드 원본...
@@ -46,9 +50,11 @@ public class GameManager : MonoBehaviour
 
     //오브젝트풀 용 변수선언.    
     Queue<Food> objectPool = new Queue<Food>();
-
+    //List,  만들어서  밖에있는 음식 관리..
+    List<GameObject> allFoodList = new List<GameObject>(); //큐ㅜ밖에있는 애들을 여기 담아야할것...
+    Coroutine fooddroppin = null;
     void Start()
-    {
+    {                
         scoreText.text = "";
         //먼저 오브젝트 풀에 내가 쓸 최대 객체들을 만들어둘것임...
         //젤리 하나가 태어나서 땅에 떨어져 죽을떄까지
@@ -57,12 +63,67 @@ public class GameManager : MonoBehaviour
         //해당 오브젝트 풀의 내용들을 모두 꺼둠. (setactive(false)) 
         for (int i = 0; i < 20; i++)
         {
-            tmpobj = Instantiate(foodPrefab, this.transform.GetChild(0));            
+            tmpobj = Instantiate(foodPrefab, this.transform.GetChild(0));
+            //tmpobj.transform.position = 위치;
+            //tmpobj.transform.rotation = 회전값;
+
+            //위의 세줄의 경우보다 밑의 한줄이 훨씬 가볍고 빠르다.
+            //tmpobj = Instantiate(foodPrefab, Vector3.zero, Quaternion.identity, this.transform.GetChild(0));
+
             objectPool.Enqueue(tmpobj.GetComponent<Food>());
             tmpobj.SetActive(false);
+            allFoodList.Add(tmpobj);
         }
 
-        StartCoroutine(GenerateFood());
+        fooddroppin = StartCoroutine(GenerateFood());
+    }
+
+    public void ControlCoroutine(bool isstart)
+    {
+        if (isstart)
+        {
+            ActivePlayer(true); //플레이어 활성화.
+            if (fooddroppin == null)
+            {
+                fooddroppin = StartCoroutine(GenerateFood());
+            }            
+        }
+        else
+        {
+            StopCoroutine(fooddroppin); //음식떨구던 코루틴도 멈추고
+            fooddroppin = null;
+
+            for (int i = 0; i < allFoodList.Count; i++) //모든 음식들 비활성화
+            {
+                allFoodList[i].SetActive(false);
+                
+            }
+
+            ActivePlayer(false); //플레이어 비활성화.
+        }        
+    }
+
+    public void ActivePlayer(bool ison)
+    {
+        player.gameObject.SetActive(ison);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            //SceneManager.LoadScene("Scenes/SecondScene");
+            //SceneManager.LoadScene("SecondScene"); //그냥 씬만 넘기면 넘길수있음                        
+            //SceneManager.LoadScene(1);
+            SceneLoadManager.Instance.ChangeScene(AllEnum.SceneKind.Second);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            //SceneManager.LoadScene("Scenes/2D_Start");
+            //SceneManager.LoadScene("2D_Start");
+            //SceneManager.LoadScene(0);
+            SceneLoadManager.Instance.ChangeScene(AllEnum.SceneKind.Game);
+        }
     }
 
     public Food GetFoodFromPool()
@@ -73,7 +134,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            return Instantiate(foodPrefab).GetComponent<Food>();
+            tmpobj = Instantiate(foodPrefab);
+            allFoodList.Add(tmpobj);
+            return tmpobj.GetComponent<Food>();
         }
     }
 
